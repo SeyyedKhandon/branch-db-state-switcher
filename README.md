@@ -48,10 +48,21 @@ This script automates the process of backing up the database before switching br
    ```
 3. Update the following variables in the script according to your project setup:
    ```bash
-   DOCKER_IMAGE_NAME="docker-image-name"
-   DB_NAME="dbname"
+   DOCKER_IMAGE_NAME="docker_image_name" 
+   DB_NAME="db_name"
    DB_USER="db_username"
    ```
+
+**Note**: How to get the docker name? There are various ways to do it:
+
+- Method1: Get it from your `docker-compose.yml` file inside your project
+- Method2: Run `docker ps` in your terminal, which shows you a list of all running docker instances, for example `myproject-db`:
+
+```bash
+~ docker ps
+CONTAINER ID   IMAGE                  COMMAND                  CREATED      STATUS      PORTS                                          NAMES
+91f8ac252584   postgres:13.4-alpine   "docker-entrypoint.s…"   5 days ago   Up 5 days   0.0.0.0:5432->5432/tcp                         myproject-db
+```
 
 ## Usage
 
