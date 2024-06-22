@@ -21,6 +21,7 @@ This script automates the process of backing up the database before switching br
 - [x] Support for manual backup and restore operations
 - [x] Support dockerized postgres database 
 - [x] Support config file per project (reading config from `.env`)
+- [ ] Support Uninstall command
 - [ ] Support for alternative config file name if it's not possible to use `.env`
 - [ ] Support simple postgres database
 - [ ] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode.psql` extension)
@@ -51,14 +52,16 @@ You can simply download `bds.sh` and use it on your local machine or follow thes
 #### Step 1 - install it
 
  
-```sh
-# if you use curl and bash
-curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds /usr/local/bin/branch-database-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
-```
+If you use curl and bash:
 
 ```sh
-# if you use curl and zsh
-curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds /usr/local/bin/branch-database-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+If you use curl and zsh:
+
+```sh
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
 Check for installtion, open you terminal and run `bds -v`: 
@@ -140,7 +143,6 @@ To fully automate the process, you need to integrate the script with Git hooks. 
 - This script is designed to work with passwordless PostgreSQL databases running in Docker containers in local machine.
 - Ensure you have the necessary permissions to execute Docker commands and access the database.
 - This script is designed for local environment for development mode, so avoid using it on production.
-
 
 ## Contributing
 
