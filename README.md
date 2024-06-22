@@ -64,7 +64,7 @@ If you use curl and zsh:
 curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-Check for installtion, open you terminal and run `bds -v`: 
+Check for installtion, open you terminal and run `bds -v` or `bds --version`: 
 ```sh
 bds -v
 # Branch database state switcher v1.0
@@ -112,7 +112,7 @@ The script accepts the following commands:
 
 **Available actions**:
 
-- `-v` or `--list`: List all backups
+- `-l` or `--list`: List all backups
 - `backup`: Create a backup
 - `restore`: Restore a backup
 - `delete`: Delete a specific backup
