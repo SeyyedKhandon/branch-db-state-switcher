@@ -20,18 +20,21 @@ This script automates the process of backing up the database before switching br
 - [x] Delete all backups
 - [x] Support for manual backup and restore operations
 - [x] Support dockerized postgres database 
+- [x] Support reading config file per project
 - [ ] Support simple postgres database
 - [ ] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode.psql` extension)
 - [ ] Install it on `pre-post checkout` hook for current branch
 - [ ] Install/Uninstall the script via brew
 - [ ] Add the script to global commands ( to be able to call it in every project without copy/pasting it )
-- [ ] Support config file per project through `init` command (operation based on config file)
-    - `init` command asks for multiple questions suchs `DB_NAME, DB_USER, etc.`
+- [x] Support config file per project through `init` command (operation based on config file)
+      - `init` command asks for multiple questions suchs `DB_NAME, DB_USER, etc.`
 - [ ] Support global config file in case of missing per project config file
 - [ ] Support save location via config file (choose between inside local docker or inside host machine)
 - [ ] Support verbose mode
 - [ ] Support `mysql`
 - [ ] Support colorize output
+- [ ] VSCode Extension via commands
+- [ ] VSCode Extension via ui to back up various things
 
 
 ## Prerequisites
@@ -51,13 +54,16 @@ You can simply download `bds.sh` and use it on your local machine or follow thes
  
 ```sh
 # if you use curl and bash
-curl -o ~/bds.sh https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds.sh && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds.sh /usr/local/bin/branch-database-state-switcher/bds.sh && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds /usr/local/bin/branch-database-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 ```sh
 # if you use curl and zsh
-curl -o ~/bds.sh https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds.sh && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds.sh /usr/local/bin/branch-database-state-switcher/bds.sh && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds /usr/local/bin/branch-database-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
+
+Check for installtion: 
+open your project and run `bds version`
 
 ##### Details
 
