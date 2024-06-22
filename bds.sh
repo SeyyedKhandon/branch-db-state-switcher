@@ -55,7 +55,7 @@ DB_NAME=$(grep DB_NAME ./.env | cut -d '=' -f2)
 DB_USER=$(grep DB_USER ./.env | cut -d '=' -f2)
 DB_PASSWORD=$(grep DB_PASSWORD ./.env | cut -d '=' -f2)
 echo ""
-echo "--------- Configuration on './bds.config' ---------"
+echo "--------- Configurations ---------"
 echo "Image name: '$DOCKER_IMAGE_NAME'"
 echo "Database name: '$DB_NAME'"
 echo "Database username: '$DB_USER'"
