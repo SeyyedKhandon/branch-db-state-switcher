@@ -1,5 +1,6 @@
 #!/bin/bash
 
+VERSION=1.0
 # branchDBSwitcher v1.0
 # This script is used to backup and restore the database inside the docker image based on the branch name.
 # The script is intended to be used in the context of the a project which uses postgresql inside the docker without password on your laptop. So if you want to use it for your project, you may need to adjust the variables "DOCKER_IMAGE_NAME, DB_NAME, DB_USER" accordingly.
@@ -22,6 +23,12 @@
 
 
 ACTION_TYPE=$1
+if [ -z "$ACTION_TYPE" ]; then
+  echo "Please provide an action type as the first argument(version, backup, restore, list)."
+  exit
+fi
+
+
 # Check if the second argument is provided
 if [ -z "$2" ]; then
     # If not provided, generate backup name based on branch name
@@ -78,7 +85,9 @@ fi
 
 # Perform the backup or restore operation
 # Check the action type: list, backup, restore, delete, delete-all
-if [ "$ACTION_TYPE" == "list" ]; then
+if [ "$ACTION_TYPE" == "version" ]; then
+    echo "Branch database state switcher v$VERSION"
+elif [ "$ACTION_TYPE" == "list" ]; then
     # Perform list all backups operation
     echo "$BACKUP_DIR:"
     if docker exec -t $DOCKER_IMAGE_NAME bash -c "ls -la $BACKUP_DIR"; then

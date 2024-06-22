@@ -15,6 +15,7 @@ This script automates the process of backing up the database before switching br
 - [x] Backup database based on current branch name
 - [x] Restore database from backup based on current branch name
 - [x] List all available backups
+- [x] Check the version of the branch db switcher
 - [x] Delete specific backups
 - [x] Delete all backups
 - [x] Support for manual backup and restore operations
@@ -41,11 +42,58 @@ This script automates the process of backing up the database before switching br
 
 ## Installation
 
-1. Clone this repository or copy the `branchDBSwitcher.sh` script to your project root.
+You can simply download `bds.sh` and use it on your local machine or follow these instructions:
+
+### Download and Make Executable
+
+#### 1 step install
+
+ 
+```sh
+# if you use curl and bash
+curl -o ~/bds.sh https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds.sh && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds.sh /usr/local/bin/branch-database-state-switcher/bds.sh && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+```sh
+# if you use curl and zsh
+curl -o ~/bds.sh https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds.sh && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds.sh /usr/local/bin/branch-database-state-switcher/bds.sh && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
+```
+
+##### Details
+
+
+1. Download the script into home directory:
+
+```sh
+curl -o ~/bds.sh https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh
+```
+
 2. Make the script executable:
-   ```
-   chmod +x ./branchDBSwitcher.sh
-   ```
+   
+```sh
+chmod +x ~/bds.sh
+```
+
+3. Add to global PATH `/usr/local/bin`:
+
+```sh
+# for bash
+sudo mkdir -p /usr/local/bin/branch-database-state-switcher
+sudo mv ~/bds.sh /usr/local/bin/branch-database-state-switcher/bds.sh
+```
+
+```sh
+# bash
+echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+```sh
+# zsh
+echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
+```
+
+------------------------ Configure it -----------------------------
+
 3. Update the following variables in the script according to your project setup:
    ```bash
    DOCKER_IMAGE_NAME="docker_image_name" 
