@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch Database State Switcher 
-VERSION=1.0
+VERSION=1.1
 
 
 # ---------------------------------------------------------------------- #
@@ -37,22 +37,23 @@ fi
 # ---------------------------------------------------------------------- #
 # Check if config file is present, otherwise ask the user to create it
 # ---------------------------------------------------------------------- #
-if [ ! -f "./bds.config" ]; then
-    echo "Config file 'bds.config' not found."
-    echo "Please create a config file with the following variables:"
+if [ ! -f "./.env" ]; then
+    echo "Config file '.env' not found."
+    echo "Please create a '.env' file with the following variables:"
     echo "DOCKER_IMAGE_NAME='your docker image name that runs the database'"
     echo "DB_NAME='your database's name'"
     echo "DB_USER='your database's username'"
     echo "DB_PASSWORD='your database's password'"
+    echo "Don't forget to add '.env' to your .gitignore file."
     echo "Exiting from 'Branch Database State Switcher v$VERSION...'"
     exit
 fi
 
-# Load variables from the bds.config file
-DOCKER_IMAGE_NAME=$(grep DOCKER_IMAGE_NAME ./bds.config | cut -d '=' -f2)
-DB_NAME=$(grep DB_NAME ./bds.config | cut -d '=' -f2)
-DB_USER=$(grep DB_USER ./bds.config | cut -d '=' -f2)
-DB_PASSWORD=$(grep DB_PASSWORD ./bds.config | cut -d '=' -f2)
+# Load variables from the .env file
+DOCKER_IMAGE_NAME=$(grep DOCKER_IMAGE_NAME ./.env | cut -d '=' -f2)
+DB_NAME=$(grep DB_NAME ./.env | cut -d '=' -f2)
+DB_USER=$(grep DB_USER ./.env | cut -d '=' -f2)
+DB_PASSWORD=$(grep DB_PASSWORD ./.env | cut -d '=' -f2)
 echo ""
 echo "--------- Configuration on './bds.config' ---------"
 echo "Image name: '$DOCKER_IMAGE_NAME'"

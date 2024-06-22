@@ -1,6 +1,6 @@
-# Branch DB Switcher
+# Branch Database State Switcher
 
-Branch DB Switcher is a bash script that helps manage database states across different Git branches. It allows you to easily backup and restore your database when switching between branches, saving time and reducing errors in development and QA processes.
+Branch Database State Switcher is a bash script that helps manage database states across different Git branches. It allows you to easily backup and restore your database when switching between branches, saving time and reducing errors in development and QA processes.
 
 ## Problem Statement
 
@@ -20,13 +20,14 @@ This script automates the process of backing up the database before switching br
 - [x] Delete all backups
 - [x] Support for manual backup and restore operations
 - [x] Support dockerized postgres database 
-- [x] Support reading config file per project
+- [x] Support config file per project (reading config from `.env`)
+- [ ] Support for alternative config file name if it's not possible to use `.env`
 - [ ] Support simple postgres database
 - [ ] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode.psql` extension)
 - [ ] Install it on `pre-post checkout` hook for current branch
 - [ ] Install/Uninstall the script via brew
 - [ ] Add the script to global commands ( to be able to call it in every project without copy/pasting it )
-- [x] Support config file per project through `init` command (operation based on config file)
+- [ ] Support config file per project through `init` command (operation based on config file)
       - `init` command asks for multiple questions suchs `DB_NAME, DB_USER, etc.`
 - [ ] Support global config file in case of missing per project config file
 - [ ] Support save location via config file (choose between inside local docker or inside host machine)
@@ -47,9 +48,7 @@ This script automates the process of backing up the database before switching br
 
 You can simply download `bds.sh` and use it on your local machine or follow these instructions:
 
-### Download and Make Executable
-
-#### 1 step install
+#### Step 1 - install it
 
  
 ```sh
@@ -62,50 +61,30 @@ curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher
 curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-database-state-switcher && sudo mv ~/bds /usr/local/bin/branch-database-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-Check for installtion: 
-open your project and run `bds version`
-
-##### Details
-
-
-1. Download the script into home directory:
-
+Check for installtion, open you terminal and run `bds -v`: 
 ```sh
-curl -o ~/bds.sh https://raw.githubusercontent.com/SeyyedKhandon/branch-db-switcher/main/bds.sh
+bds -v
+# Branch database state switcher v1.0
 ```
 
-2. Make the script executable:
-   
-```sh
-chmod +x ~/bds.sh
+#### Step 2 - configure it
+
+In order to use it inside your project, you need to create a `.env` file inside your project, if you don't have. Don't forget to add `.env` to your `.gitignore` file. 
+
+3. Add the following variables inside the `.env` of your project:
+
+```bash
+# DOCKER_IMAGE_NAME="your docker image name that runs the database" 
+# DB_NAME="your database's name"
+# DB_USER="your database's username"
+# DB_PASSWORD="your database's password which usually on local is empty"
+
+# For example:
+DOCKER_IMAGE_NAME=myproject-db
+DB_NAME=my_db_name
+DB_USER=admin
+DB_PASSWORD=
 ```
-
-3. Add to global PATH `/usr/local/bin`:
-
-```sh
-# for bash
-sudo mkdir -p /usr/local/bin/branch-database-state-switcher
-sudo mv ~/bds.sh /usr/local/bin/branch-database-state-switcher/bds.sh
-```
-
-```sh
-# bash
-echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
-```
-
-```sh
-# zsh
-echo 'export PATH="/usr/local/bin/branch-database-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
-```
-
------------------------- Configure it -----------------------------
-
-3. Update the following variables in the script according to your project setup:
-   ```bash
-   DOCKER_IMAGE_NAME="docker_image_name" 
-   DB_NAME="db_name"
-   DB_USER="db_username"
-   ```
 
 **Note**: How to get the docker name? There are various ways to do it:
 
@@ -122,12 +101,15 @@ CONTAINER ID   IMAGE                  COMMAND                  CREATED      STAT
 
 The script accepts the following commands:
 
-```
-./branchDBSwitcher.sh <action_type> [backup_name]
+```sh
+./bds <action_type> [backup/restore/delete_name]
+# Second argument for backup/restore/delete is optional, so if you dont provide it, it will automatically generate a name based on your current working branch
+
 ```
 
-Available actions:
-- `list`: List all backups
+**Available actions**:
+
+- `-v` or `--list`: List all backups
 - `backup`: Create a backup
 - `restore`: Restore a backup
 - `delete`: Delete a specific backup
@@ -135,40 +117,19 @@ Available actions:
 
 Examples:
 
-1. List all backups:
-   ```
-   ./branchDBSwitcher.sh list
-   ```
+1. List all backups: `bds -l`
 
-2. Automatic backup based on current branch name:
-   ```
-   ./branchDBSwitcher.sh backup
-   ```
+2. Automatic backup based on current branch name: `bds backup`
 
-3. Automatic restore based on current branch name:
-   ```
-   ./branchDBSwitcher.sh restore
-   ```
+3. Automatic restore based on current branch name: `bds restore`
 
-4. Manual backup with a custom name:
-   ```
-   ./branchDBSwitcher.sh backup myBackup
-   ```
+4. Manual backup with a custom name: `bds backup myBackup`
 
-5. Manual restore with a custom name:
-   ```
-   ./branchDBSwitcher.sh restore myBackup
-   ```
+5. Manual restore with a custom name: `bds restore myBackup`
 
-6. Delete a specific backup:
-   ```
-   ./branchDBSwitcher.sh delete myBackup
-   ```
+6. Delete a specific backup: `bds delete myBackup`
 
-7. Delete all backups:
-   ```
-   ./branchDBSwitcher.sh delete-all
-   ```
+7. Delete all backups: `bds delete-all`
 
 ## Git Hooks Integration
 
