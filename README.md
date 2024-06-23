@@ -22,12 +22,12 @@ This script automates the process of backing up the database before switching br
 - [x] Support dockerized postgres database 
 - [x] Support config file per project (reading config from `.env`)
 - [x] Uninstall command
+- [x] Add the script to global commands ( to be able to call it in every project without copy/pasting it )
 - [ ] Support for alternative config file name if it's not possible to use `.env`
 - [ ] Support simple postgres database
 - [ ] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode.psql` extension)
 - [ ] Install it on `pre-post checkout` hook for current branch
 - [ ] Install/Uninstall the script via brew
-- [ ] Add the script to global commands ( to be able to call it in every project without copy/pasting it )
 - [ ] Support config file per project through `init` command (operation based on config file)
       - `init` command asks for multiple questions suchs `DB_NAME, DB_USER, etc.`
 - [ ] Support global config file in case of missing per project config file
@@ -48,13 +48,13 @@ You can simply download `bds.sh` and use it on your local machine or follow thes
 If you use curl and bash:
 
 ```sh
-curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc && RESULT=$(bds -v) && echo "\r\n $RESULT has been installed. \r\n" && echo "Read available commands https://github.com/SeyyedKhandon/branch-db-state-switcher" && echo "Please give a star on github to support us."
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && if ! grep -q '/usr/local/bin/branch-db-state-switcher' ~/.bashrc; then echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.bashrc; fi && source ~/.bashrc && RESULT=$(bds -v) && echo "\r\n $RESULT has been installed. \r\n" && echo "Read available commands https://github.com/SeyyedKhandon/branch-db-state-switcher" && echo "\r\n****Please give a star on github to support us.****\r\n"
 ```
 
 If you use curl and zsh:
 
 ```sh
-curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc && RESULT=$(bds -v) && echo "\r\n $RESULT has been installed. \r\n" && echo "Read available commands https://github.com/SeyyedKhandon/branch-db-state-switcher" && echo "Please give a star on github to support us."
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && if ! grep -q '/usr/local/bin/branch-db-state-switcher' ~/.zshrc; then echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.zshrc; fi && source ~/.zshrc && RESULT=$(bds -v) && echo "\r\n $RESULT has been installed. \r\n" && echo "Read available commands https://github.com/SeyyedKhandon/branch-db-state-switcher" && echo "\r\n****Please give a star on github to support us.****\r\n"
 ```
 
 Check for installtion, open you terminal and run `bds -v` or `bds --version`: 
