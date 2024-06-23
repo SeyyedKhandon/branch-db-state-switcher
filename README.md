@@ -71,17 +71,17 @@ In order to use it inside your project, you need to create a `.env` file inside 
 
 ```bash
 # DOCKER_IMAGE_NAME="your docker image name that runs the database" 
-# DB_NAME="your database's name"
-# DB_USER="your database's username"
-# DB_PASSWORD="your database's password which usually on local is empty"
-# SAFE_RESTORE_MODE="true or false" # By default if you dont provide anything, it is true, so before any restore command, it will take safemode backup. If you want to turnoff this feature, just set it's value to false. 
+# BDS_DB_NAME="your database's name"
+# BDS_DB_USER="your database's username"
+# BDS_DB_PASSWORD="your database's password which usually on local is empty"
+# BDS_SAFE_RESTORE_MODE="true or false" # By default if you dont provide anything, it is true, so before any restore command, it will take safemode backup. If you want to turnoff this feature, just set it's value to false. 
 
 # For example:
-DOCKER_IMAGE_NAME=myproject-db
-DB_NAME=my_db_name
-DB_USER=admin
-DB_PASSWORD=
-SAFE_RESTORE_MODE=true
+BDS_DOCKER_IMAGE_NAME=myproject-db
+BDS_DB_NAME=my_db_name
+BDS_DB_USER=admin
+BDS_DB_PASSWORD=
+BDS_SAFE_RESTORE_MODE=true
 ```
 
 **Note**: How to get the docker name? There are various ways to do it:
