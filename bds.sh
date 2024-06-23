@@ -54,12 +54,18 @@ DOCKER_IMAGE_NAME=$(grep DOCKER_IMAGE_NAME ./.env | cut -d '=' -f2)
 DB_NAME=$(grep DB_NAME ./.env | cut -d '=' -f2)
 DB_USER=$(grep DB_USER ./.env | cut -d '=' -f2)
 DB_PASSWORD=$(grep DB_PASSWORD ./.env | cut -d '=' -f2)
+SAFE_RESTORE_MODE=$(grep SAFE_RESTORE_MODE ./.env | cut -d '=' -f2)
+# Set default value for SAFE_RESTORE_MODE=true if not provided
+if [ -z "$SAFE_RESTORE_MODE" ]; then
+SAFE_RESTORE_MODE="true"
+fi
 echo ""
 echo "--------- Configurations ---------"
 echo "Image name: '$DOCKER_IMAGE_NAME'"
 echo "Database name: '$DB_NAME'"
 echo "Database username: '$DB_USER'"
 echo "Database password: '$DB_PASSWORD'"
+echo "Safe restore mode: '$SAFE_RESTORE_MODE'"
 echo "------------------------"
 echo ""
 
@@ -156,6 +162,19 @@ if [ "$ACTION_TYPE" == "backup" ]; then
         echo "Failed to create backup file inside docker."
     fi
 elif [ "$ACTION_TYPE" == "restore" ]; then
+
+    # Check if safe restore mode is not false
+    if [ "$SAFE_RESTORE_MODE" != "false" ]; then
+        # Get a backup with safemode extension
+        if docker exec -t $DOCKER_IMAGE_NAME bash -c "pg_dump -Fc -U $DB_USER -d $DB_NAME > $BACKUP_DIR/$BACKUP_NAME.safemode"; then
+            echo "Created a safemode backup before restoring: '$BACKUP_DIR/$BACKUP_NAME.safemode'."
+        else
+            echo "Failed to create safemode backup file inside docker."
+            exit
+        fi
+    else 
+        echo "Taking backup for safemode before restore operation is disabled(SAFE_RESTORE_MODE=false)"
+    fi
     # Perform restore operation
     # First, drop all tables in the database
 if docker exec -t $DOCKER_IMAGE_NAME bash -c "psql -U $DB_USER -d $DB_NAME -t <<EOF | psql -U $DB_USER -d $DB_NAME

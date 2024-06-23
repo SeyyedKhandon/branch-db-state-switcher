@@ -23,9 +23,9 @@ This script automates the process of backing up the database before switching br
 - [x] Support config file per project (reading config from `.env`)
 - [x] Uninstall command
 - [x] Add the script to global commands ( to be able to call it in every project without copy/pasting it )
+- [x] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode` extension)
 - [ ] Support for alternative config file name if it's not possible to use `.env`
 - [ ] Support simple postgres database
-- [ ] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode.psql` extension)
 - [ ] Install it on `pre-post checkout` hook for current branch
 - [ ] Install/Uninstall the script via brew
 - [ ] Support config file per project through `init` command (operation based on config file)
@@ -74,12 +74,14 @@ In order to use it inside your project, you need to create a `.env` file inside 
 # DB_NAME="your database's name"
 # DB_USER="your database's username"
 # DB_PASSWORD="your database's password which usually on local is empty"
+# SAFE_RESTORE_MODE="true or false" # By default if you dont provide anything, it is true, so before any restore command, it will take safemode backup. If you want to turnoff this feature, just set it's value to false. 
 
 # For example:
 DOCKER_IMAGE_NAME=myproject-db
 DB_NAME=my_db_name
 DB_USER=admin
 DB_PASSWORD=
+SAFE_RESTORE_MODE=true
 ```
 
 **Note**: How to get the docker name? There are various ways to do it:
