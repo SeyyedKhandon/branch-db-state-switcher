@@ -3,7 +3,6 @@
 # Branch Database State Switcher 
 VERSION=1.2
 
-
 # ---------------------------------------------------------------------- #
 # Check if the first argument is provided
 # ---------------------------------------------------------------------- #
@@ -139,14 +138,14 @@ echo "Backup name: '$BACKUP_NAME'"
 # ---------------------------------------------------------------------- #
 echo ""
 echo "Do you want to run '$ACTION_TYPE' process for your DB on '$BACKUP_NAME' branch? (y/n)"
-echo ""
 read answer
 if [ "$answer" = "y" ]; then
 echo "===================================================================="
 echo "Starting database $ACTION_TYPE process on the docker image itself"
 echo "===================================================================="
+echo ""
 else
-  echo "Exiting..."
+  echo "Exiting...\r\n"
   exit
 fi
 
@@ -210,3 +209,5 @@ else
     # Handle invalid action type
     echo "Invalid action type. Please provide either 'list', 'backup', 'restore', 'delete', or 'delete-all' as the first argument."
 fi
+
+echo ""
