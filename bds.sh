@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch Database State Switcher 
-VERSION=1.1
+VERSION=1.2
 
 
 # ---------------------------------------------------------------------- #
