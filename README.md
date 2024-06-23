@@ -21,7 +21,7 @@ This script automates the process of backing up the database before switching br
 - [x] Support for manual backup and restore operations
 - [x] Support dockerized postgres database 
 - [x] Support config file per project (reading config from `.env`)
-- [ ] Support Uninstall command
+- [x] Uninstall command
 - [ ] Support for alternative config file name if it's not possible to use `.env`
 - [ ] Support simple postgres database
 - [ ] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode.psql` extension)
@@ -38,13 +38,6 @@ This script automates the process of backing up the database before switching br
 - [ ] VSCode Extension via commands
 - [ ] VSCode Extension via ui to back up various things
 
-
-## Prerequisites
-
-- Docker
-- Git
-- PostgreSQL (running in a Docker container)
-
 ## Installation
 
 You can simply download `bds.sh` and use it on your local machine or follow these instructions:
@@ -55,13 +48,13 @@ You can simply download `bds.sh` and use it on your local machine or follow thes
 If you use curl and bash:
 
 ```sh
-curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.bashrc && source ~/.bashrc && RESULT=$(bds -v) && echo "\r\n $RESULT has been installed. \r\n" && echo "Read available commands https://github.com/SeyyedKhandon/branch-db-state-switcher" && echo "Please give a star on github to support us."
 ```
 
 If you use curl and zsh:
 
 ```sh
-curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc
+curl -o ~/bds https://raw.githubusercontent.com/SeyyedKhandon/branch-db-state-switcher/main/bds.sh && chmod +x ~/bds && sudo mkdir -p /usr/local/bin/branch-db-state-switcher && sudo mv ~/bds /usr/local/bin/branch-db-state-switcher/bds && echo 'export PATH="/usr/local/bin/branch-db-state-switcher:$PATH"' >> ~/.zshrc && source ~/.zshrc && RESULT=$(bds -v) && echo "\r\n $RESULT has been installed. \r\n" && echo "Read available commands https://github.com/SeyyedKhandon/branch-db-state-switcher" && echo "Please give a star on github to support us."
 ```
 
 Check for installtion, open you terminal and run `bds -v` or `bds --version`: 
@@ -99,6 +92,23 @@ DB_PASSWORD=
 CONTAINER ID   IMAGE                  COMMAND                  CREATED      STATUS      PORTS                                          NAMES
 91f8ac252584   postgres:13.4-alpine   "docker-entrypoint.s…"   5 days ago   Up 5 days   0.0.0.0:5432->5432/tcp                         myproject-db
 ```
+
+#### Uninstall
+
+If you no longer need this script and want to completely remove it, just run below command:
+
+For bash users:
+
+```sh
+sudo sudo rm -R /usr/local/bin/branch-db-state-switcher && sed -i '' '/export PATH="\/usr\/local\/bin\/branch-db-state-switcher:\$PATH"/d' ~/.zshrc && source ~/.zshrc && echo "Branch DB State Switcher has been uninstalled."
+```
+
+For zsh users:
+
+```sh
+sudo rm -R /usr/local/bin/branch-db-state-switcher && sed -i '' '/export PATH="\/usr\/local\/bin\/branch-db-state-switcher:\$PATH"/d' ~/.zshrc && source ~/.zshrc && echo "Branch DB State Switcher has been uninstalled."
+```
+
 
 ## Usage
 
