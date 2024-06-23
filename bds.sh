@@ -40,32 +40,32 @@ fi
 if [ ! -f "./.env" ]; then
     echo "Config file '.env' not found."
     echo "Please create a '.env' file with the following variables:"
-    echo "DOCKER_IMAGE_NAME='your docker image name that runs the database'"
-    echo "DB_NAME='your database's name'"
-    echo "DB_USER='your database's username'"
-    echo "DB_PASSWORD='your database's password'"
+    echo "BDS_DOCKER_IMAGE_NAME='your docker image name that runs the database'"
+    echo "BDS_DB_NAME='your database's name'"
+    echo "BDS_DB_USER='your database's username'"
+    echo "BDS_DB_PASSWORD='your database's password'"
     echo "Don't forget to add '.env' to your .gitignore file."
     echo "Exiting from 'Branch Database State Switcher v$VERSION...'"
     exit
 fi
 
 # Load variables from the .env file
-DOCKER_IMAGE_NAME=$(grep DOCKER_IMAGE_NAME ./.env | cut -d '=' -f2)
-DB_NAME=$(grep DB_NAME ./.env | cut -d '=' -f2)
-DB_USER=$(grep DB_USER ./.env | cut -d '=' -f2)
-DB_PASSWORD=$(grep DB_PASSWORD ./.env | cut -d '=' -f2)
-SAFE_RESTORE_MODE=$(grep SAFE_RESTORE_MODE ./.env | cut -d '=' -f2)
-# Set default value for SAFE_RESTORE_MODE=true if not provided
-if [ -z "$SAFE_RESTORE_MODE" ]; then
-SAFE_RESTORE_MODE="true"
+BDS_DOCKER_IMAGE_NAME=$(grep BDS_DOCKER_IMAGE_NAME ./.env | cut -d '=' -f2)
+BDS_DB_NAME=$(grep BDS_DB_NAME ./.env | cut -d '=' -f2)
+BDS_DB_USER=$(grep BDS_DB_USER ./.env | cut -d '=' -f2)
+BDS_DB_PASSWORD=$(grep BDS_DB_PASSWORD ./.env | cut -d '=' -f2)
+BDS_SAFE_RESTORE_MODE=$(grep BDS_SAFE_RESTORE_MODE ./.env | cut -d '=' -f2)
+# Set default value for BDS_SAFE_RESTORE_MODE=true if not provided
+if [ -z "$BDS_SAFE_RESTORE_MODE" ]; then
+BDS_SAFE_RESTORE_MODE="true"
 fi
 echo ""
 echo "--------- Configurations ---------"
-echo "Image name: '$DOCKER_IMAGE_NAME'"
-echo "Database name: '$DB_NAME'"
-echo "Database username: '$DB_USER'"
-echo "Database password: '$DB_PASSWORD'"
-echo "Safe restore mode: '$SAFE_RESTORE_MODE'"
+echo "Image name: 'BDS_DOCKER_IMAGE_NAME=$BDS_DOCKER_IMAGE_NAME'"
+echo "Database name: 'BDS_DB_NAME=$BDS_DB_NAME'"
+echo "Database username: 'BDS_DB_USER=$BDS_DB_USER'"
+echo "Database password: 'BDS_DB_PASSWORD=$BDS_DB_PASSWORD'"
+echo "Safe restore mode: 'BDS_SAFE_RESTORE_MODE=$BDS_SAFE_RESTORE_MODE'"
 echo "------------------------"
 echo ""
 
@@ -73,8 +73,8 @@ echo ""
 # ---------------------------------------------------------------------- #
 # Check if the docker image is running
 # ---------------------------------------------------------------------- #
-if ! docker ps | grep $DOCKER_IMAGE_NAME > /dev/null; then
-    echo "Docker image '$DOCKER_IMAGE_NAME' is not running."
+if ! docker ps | grep $BDS_DOCKER_IMAGE_NAME > /dev/null; then
+    echo "Docker image '$BDS_DOCKER_IMAGE_NAME' is not running."
     echo "Please start the docker image and try again."
     echo "Exiting from 'Branch Database State Switcher v$VERSION...'"
     exit
@@ -83,7 +83,7 @@ fi
 # ---------------------------------------------------------------------- #
 # Check if the database is accessible
 # ---------------------------------------------------------------------- #
-if ! docker exec $DOCKER_IMAGE_NAME psql -U $DB_USER -d $DB_NAME -c "SELECT version();" > /dev/null; then
+if ! docker exec $BDS_DOCKER_IMAGE_NAME psql -U $BDS_DB_USER -d $BDS_DB_NAME -c "SELECT version();" > /dev/null; then
     echo "Failed to connect to the database."
     echo "Please check the database name and user in the config file."
     echo "Exiting from 'Branch Database State Switcher v$VERSION...'"
@@ -95,8 +95,8 @@ fi
 # Check if the BACKUP_DIR is present inside the container
 # ---------------------------------------------------------------------- #
 BACKUP_DIR="/branched_db_backups"
-if ! docker exec $DOCKER_IMAGE_NAME [ -d $BACKUP_DIR ]; then
-    if docker exec $DOCKER_IMAGE_NAME mkdir -p $BACKUP_DIR; then
+if ! docker exec $BDS_DOCKER_IMAGE_NAME [ -d $BACKUP_DIR ]; then
+    if docker exec $BDS_DOCKER_IMAGE_NAME mkdir -p $BACKUP_DIR; then
         echo "Backup directory '$BACKUP_DIR' created successfully."
     else
         echo "Failed to create backup directory."
@@ -126,7 +126,7 @@ echo "Backup name: '$BACKUP_NAME'"
 if [ "$ACTION_TYPE" == "--list" ] || [ "$ACTION_TYPE" == "-l" ]; then
     # Perform list all backups operation
     echo "$BACKUP_DIR:"
-    if output=$(docker exec -t $DOCKER_IMAGE_NAME bash -c "ls -l $BACKUP_DIR" 2>&1); then
+    if output=$(docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "ls -l $BACKUP_DIR" 2>&1); then
     echo "$output"
     else 
     echo "Failed to list all backups inside the container. Error: $output"
@@ -156,7 +156,7 @@ fi
 # ---------------------------------------------------------------------- #
 if [ "$ACTION_TYPE" == "backup" ]; then
     # Perform backup operation
-    if docker exec -t $DOCKER_IMAGE_NAME bash -c "pg_dump -Fc -U $DB_USER -d $DB_NAME > $BACKUP_DIR/$BACKUP_NAME"; then
+    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "pg_dump -Fc -U $BDS_DB_USER -d $BDS_DB_NAME > $BACKUP_DIR/$BACKUP_NAME"; then
         echo "Backup process completed successfully inside docker at '$BACKUP_DIR/$BACKUP_NAME'."
     else
         echo "Failed to create backup file inside docker."
@@ -164,26 +164,26 @@ if [ "$ACTION_TYPE" == "backup" ]; then
 elif [ "$ACTION_TYPE" == "restore" ]; then
 
     # Check if safe restore mode is not false
-    if [ "$SAFE_RESTORE_MODE" != "false" ]; then
+    if [ "$BDS_SAFE_RESTORE_MODE" != "false" ]; then
         # Get a backup with safemode extension
-        if docker exec -t $DOCKER_IMAGE_NAME bash -c "pg_dump -Fc -U $DB_USER -d $DB_NAME > $BACKUP_DIR/$BACKUP_NAME.safemode"; then
+        if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "pg_dump -Fc -U $BDS_DB_USER -d $BDS_DB_NAME > $BACKUP_DIR/$BACKUP_NAME.safemode"; then
             echo "Created a safemode backup before restoring: '$BACKUP_DIR/$BACKUP_NAME.safemode'."
         else
             echo "Failed to create safemode backup file inside docker."
             exit
         fi
     else 
-        echo "Taking backup for safemode before restore operation is disabled(SAFE_RESTORE_MODE=false)"
+        echo "Taking backup for safemode before restore operation is disabled(BDS_SAFE_RESTORE_MODE=false)"
     fi
     # Perform restore operation
     # First, drop all tables in the database
-if docker exec -t $DOCKER_IMAGE_NAME bash -c "psql -U $DB_USER -d $DB_NAME -t <<EOF | psql -U $DB_USER -d $DB_NAME
+if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -t <<EOF | psql -U $BDS_DB_USER -d $BDS_DB_NAME
 SELECT 'DROP TABLE IF EXISTS \"' || tablename || '\" CASCADE;' FROM pg_tables WHERE schemaname = 'public';
-EOF" > /dev/null 2>&1  && docker exec -t $DOCKER_IMAGE_NAME bash -c "psql -U $DB_USER -d $DB_NAME -c 'SET session_replication_role = replica;'" > /dev/null 2>&1; then
+EOF" > /dev/null 2>&1  && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = replica;'" > /dev/null 2>&1; then
 
     echo "Dropped all tables inside the database for clean restore."
 
-    if docker exec -t $DOCKER_IMAGE_NAME bash -c "pg_restore --clean --if-exists -U $DB_USER -d $DB_NAME $BACKUP_DIR/$BACKUP_NAME" > /dev/null 2>&1 && docker exec -t $DOCKER_IMAGE_NAME bash -c "psql -U $DB_USER -d $DB_NAME -c 'SET session_replication_role = DEFAULT;'" > /dev/null 2>&1; then
+    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "pg_restore --clean --if-exists -U $BDS_DB_USER -d $BDS_DB_NAME $BACKUP_DIR/$BACKUP_NAME" > /dev/null 2>&1 && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = DEFAULT;'" > /dev/null 2>&1; then
     echo "Restore process completed successfully inside docker from '$BACKUP_DIR/$BACKUP_NAME'."
     else
         echo "Failed to restore backup file or re-enable FK checks."
@@ -193,15 +193,15 @@ else
 fi
 elif [ "$ACTION_TYPE" == "delete" ]; then
     # Perform delete specific backup operation
-    if docker exec -t $DOCKER_IMAGE_NAME bash -c "rm $BACKUP_DIR/$BACKUP_NAME"; then
-        docker exec -t $DOCKER_IMAGE_NAME bash -c "ls -la $BACKUP_DIR"
+    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "rm $BACKUP_DIR/$BACKUP_NAME"; then
+        docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "ls -la $BACKUP_DIR"
         echo "Deleted backup '$BACKUP_DIR/$BACKUP_NAME' inside the container."
     else 
         echo "Failed to delete backup '$BACKUP_DIR/$BACKUP_NAME' inside the container."
     fi
 elif [ "$ACTION_TYPE" == "delete-all" ]; then
     # Perform delete all backups operation
-    if docker exec -t $DOCKER_IMAGE_NAME bash -c "rm -R $BACKUP_DIR"; then
+    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "rm -R $BACKUP_DIR"; then
         echo "Deleted all backups inside the container."
     else 
         echo "Failed to delete all backups inside the container."
