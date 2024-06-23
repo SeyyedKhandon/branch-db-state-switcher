@@ -56,16 +56,15 @@ BDS_DB_USER=$(grep BDS_DB_USER ./.env | cut -d '=' -f2)
 BDS_DB_PASSWORD=$(grep BDS_DB_PASSWORD ./.env | cut -d '=' -f2)
 BDS_SAFE_RESTORE_MODE=$(grep BDS_SAFE_RESTORE_MODE ./.env | cut -d '=' -f2)
 # Set default value for BDS_SAFE_RESTORE_MODE=true if not provided
-if [ -z "$BDS_SAFE_RESTORE_MODE" ]; then
-BDS_SAFE_RESTORE_MODE="true"
-fi
+if [ -z "$BDS_SAFE_RESTORE_MODE" ]; then BDS_SAFE_RESTORE_MODE="true"; fi;
+
 echo ""
 echo "--------- Configurations ---------"
-echo "Image name: 'BDS_DOCKER_IMAGE_NAME=$BDS_DOCKER_IMAGE_NAME'"
-echo "Database name: 'BDS_DB_NAME=$BDS_DB_NAME'"
-echo "Database username: 'BDS_DB_USER=$BDS_DB_USER'"
-echo "Database password: 'BDS_DB_PASSWORD=$BDS_DB_PASSWORD'"
-echo "Safe restore mode: 'BDS_SAFE_RESTORE_MODE=$BDS_SAFE_RESTORE_MODE'"
+echo "Image name(BDS_DOCKER_IMAGE_NAME): '$BDS_DOCKER_IMAGE_NAME'"
+echo "Database name(BDS_DB_NAME): '$BDS_DB_NAME'"
+echo "Database username(BDS_DB_USER): '$BDS_DB_USER'"
+echo "Database password(BDS_DB_PASSWORD): '$BDS_DB_PASSWORD'"
+echo "Safe restore mode(BDS_SAFE_RESTORE_MODE): '$BDS_SAFE_RESTORE_MODE'"
 echo "------------------------"
 echo ""
 
@@ -94,15 +93,31 @@ fi
 # ---------------------------------------------------------------------- #
 # Check if the BACKUP_DIR is present inside the container
 # ---------------------------------------------------------------------- #
-BACKUP_DIR="/branched_db_backups"
+BACKUP_DIR="/bds_backups"
 if ! docker exec $BDS_DOCKER_IMAGE_NAME [ -d $BACKUP_DIR ]; then
     if docker exec $BDS_DOCKER_IMAGE_NAME mkdir -p $BACKUP_DIR; then
         echo "Backup directory '$BACKUP_DIR' created successfully."
     else
         echo "Failed to create backup directory."
     fi
+else 
+    echo "Backup directory: '$BACKUP_DIR'"
 fi
-echo "Backup directory: '$BACKUP_DIR'"
+
+# ---------------------------------------------------------------------- #
+# List all backups inside the container
+# ---------------------------------------------------------------------- #
+if [ "$ACTION_TYPE" == "--list" ] || [ "$ACTION_TYPE" == "-l" ]; then
+    # Perform list all backups operation
+    echo "$BACKUP_DIR:"
+    if output=$(docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "ls -l $BACKUP_DIR" 2>&1); then
+    echo "$output"
+    else 
+    echo "Failed to list all backups inside the container. Error: $output"
+    fi
+exit
+fi
+
 
 # ---------------------------------------------------------------------- #
 # Check if the BACKUP_NAME name is provided as the second argument
@@ -118,21 +133,6 @@ if [ "$ACTION_TYPE" == "backup" ] || [ "$ACTION_TYPE" == "restore" ] || [ "$ACTI
 fi
 echo "Backup name: '$BACKUP_NAME'"
 
-
-
-# ---------------------------------------------------------------------- #
-# List all backups inside the container
-# ---------------------------------------------------------------------- #
-if [ "$ACTION_TYPE" == "--list" ] || [ "$ACTION_TYPE" == "-l" ]; then
-    # Perform list all backups operation
-    echo "$BACKUP_DIR:"
-    if output=$(docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "ls -l $BACKUP_DIR" 2>&1); then
-    echo "$output"
-    else 
-    echo "Failed to list all backups inside the container. Error: $output"
-    fi
-exit
-fi
 
 # ---------------------------------------------------------------------- #
 # Ask the user to confirm the action
