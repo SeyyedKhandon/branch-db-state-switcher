@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch Database State Switcher 
-VERSION=1.2
+VERSION=1.3
 
 # ---------------------------------------------------------------------- #
 # Check if the first argument is provided
@@ -161,6 +161,13 @@ if [ "$ACTION_TYPE" == "backup" ]; then
         echo "Failed to create backup file inside docker."
     fi
 elif [ "$ACTION_TYPE" == "restore" ]; then
+
+    # Check if the backup file exists
+    if ! docker exec $BDS_DOCKER_IMAGE_NAME [ -f $BACKUP_DIR/$BACKUP_NAME ]; then
+        echo "Backup file '$BACKUP_DIR/$BACKUP_NAME' not found inside the container."
+        echo "Exiting from 'Branch Database State Switcher v$VERSION...'"
+        exit
+    fi
 
     # Check if safe restore mode is not false
     if [ "$BDS_SAFE_RESTORE_MODE" != "false" ]; then
