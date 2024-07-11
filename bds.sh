@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch Database State Switcher 
-VERSION=1.3
+VERSION=1.4
 
 # ---------------------------------------------------------------------- #
 # Check if the first argument is provided
@@ -121,7 +121,7 @@ fi
 # ---------------------------------------------------------------------- #
 # Check if the BACKUP_NAME name is provided as the second argument
 # ---------------------------------------------------------------------- #
-if [ "$ACTION_TYPE" == "backup" ] || [ "$ACTION_TYPE" == "restore" ] || [ "$ACTION_TYPE" == "delete" ]; then
+if [ "$ACTION_TYPE" == "backup" ] || [ "$ACTION_TYPE" == "backup-local" ] || [ "$ACTION_TYPE" == "restore" ] || [ "$ACTION_TYPE" == "restore-local" ] || [ "$ACTION_TYPE" == "delete" ]; then
     if [ -z "$2" ]; then
         # If not provided, generate backup name based on branch name
         BACKUP_NAME="$(git rev-parse --abbrev-ref HEAD | sed 's|/|_|g')"
@@ -153,6 +153,7 @@ fi
 # ---------------------------------------------------------------------- #
 # Perform Actions
 # ---------------------------------------------------------------------- #
+###### Backup Inside Docker ######
 if [ "$ACTION_TYPE" == "backup" ]; then
     # Perform backup operation
     if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "pg_dump -Fc -U $BDS_DB_USER -d $BDS_DB_NAME > $BACKUP_DIR/$BACKUP_NAME"; then
@@ -160,6 +161,16 @@ if [ "$ACTION_TYPE" == "backup" ]; then
     else
         echo "Failed to create backup file inside docker."
     fi
+###### Backup Locally in the current working directory ######
+elif [ "$ACTION_TYPE" == "backup-local" ]; then
+    # Perform local backup operation
+    if docker exec -i $BDS_DOCKER_IMAGE_NAME pg_dump -Fc -U $BDS_DB_USER -d $BDS_DB_NAME > "./$BACKUP_NAME"; then
+        echo "Local Backup process completed successfully './$BACKUP_NAME'"
+    else
+        echo "Failed to create backup file locally './$BACKUP_NAME'"
+    fi
+
+###### Restore DB From Backup files Inside Docker ######
 elif [ "$ACTION_TYPE" == "restore" ]; then
 
     # Check if the backup file exists
@@ -181,22 +192,63 @@ elif [ "$ACTION_TYPE" == "restore" ]; then
     else 
         echo "Taking backup for safemode before restore operation is disabled(BDS_SAFE_RESTORE_MODE=false)"
     fi
-    # Perform restore operation
+
     # First, drop all tables in the database
-if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -t <<EOF | psql -U $BDS_DB_USER -d $BDS_DB_NAME
+    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -t <<EOF | psql -U $BDS_DB_USER -d $BDS_DB_NAME
 SELECT 'DROP TABLE IF EXISTS \"' || tablename || '\" CASCADE;' FROM pg_tables WHERE schemaname = 'public';
 EOF" > /dev/null 2>&1  && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = replica;'" > /dev/null 2>&1; then
 
-    echo "Dropped all tables inside the database for clean restore."
+        echo "Dropped all tables inside the database for clean restore."
 
-    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "pg_restore --clean --if-exists -U $BDS_DB_USER -d $BDS_DB_NAME $BACKUP_DIR/$BACKUP_NAME" > /dev/null 2>&1 && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = DEFAULT;'" > /dev/null 2>&1; then
-    echo "Restore process completed successfully inside docker from '$BACKUP_DIR/$BACKUP_NAME'."
+        if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "pg_restore --clean --if-exists -U $BDS_DB_USER -d $BDS_DB_NAME $BACKUP_DIR/$BACKUP_NAME" > /dev/null 2>&1 && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = DEFAULT;'" > /dev/null 2>&1; then
+        echo "Restore process completed successfully inside docker from '$BACKUP_DIR/$BACKUP_NAME'."
+        else
+            echo "Failed to restore backup file or re-enable FK checks."
+        fi
     else
-        echo "Failed to restore backup file or re-enable FK checks."
+        echo "Failed to drop tables inside the database for a clean restore."
     fi
-else
-    echo "Failed to drop tables inside the database for a clean restore."
-fi
+
+###### Restore DB From Local Backup files ######
+elif [ "$ACTION_TYPE" == "restore-local" ]; then
+
+ # Check if the backup file exists locally
+    if [ ! -f "./$BACKUP_NAME" ]; then
+        echo "Local backup file './$BACKUP_NAME' not found."
+        echo "Exiting from 'Branch Database State Switcher v$VERSION...'"
+        exit
+    fi
+
+    # Check if safe restore mode is not false
+    if [ "$BDS_SAFE_RESTORE_MODE" != "false" ]; then
+        # Get a backup with safemode extension
+        if docker exec -t $BDS_DOCKER_IMAGE_NAME pg_dump -Fc -U $BDS_DB_USER -d $BDS_DB_NAME > ./$BACKUP_NAME.safemode; then
+            echo "Created a safemode backup locally before restoring: './$BACKUP_NAME.safemode'"
+        else
+            echo "Failed to create safemode backup."
+            exit
+        fi
+    else 
+        echo "Taking backup for safemode before restore operation is disabled (BDS_SAFE_RESTORE_MODE=false)"
+    fi
+
+    # First, drop all tables in the database
+    if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -t <<EOF | psql -U $BDS_DB_USER -d $BDS_DB_NAME
+SELECT 'DROP TABLE IF EXISTS \"' || tablename || '\" CASCADE;' FROM pg_tables WHERE schemaname = 'public';
+EOF" > /dev/null 2>&1  && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = replica;'" > /dev/null 2>&1; then
+
+        echo "Dropped all tables inside the database for clean restore."
+######### Restore the backup file from local backup #########
+        if docker exec -i $BDS_DOCKER_IMAGE_NAME pg_restore --clean --if-exists -U $BDS_DB_USER -d $BDS_DB_NAME < "$BACKUP_NAME" > /dev/null 2>&1 && docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "psql -U $BDS_DB_USER -d $BDS_DB_NAME -c 'SET session_replication_role = DEFAULT;'" > /dev/null 2>&1; then
+        echo "Restore process completed successfully from local backup './$BACKUP_NAME'."
+        else
+            echo "Failed to restore backup file or re-enable FK checks."
+        fi
+    else
+        echo "Failed to drop tables inside the database for a clean restore."
+    fi
+
+###### Delete a specific Backup file Inside Docker ######
 elif [ "$ACTION_TYPE" == "delete" ]; then
     # Perform delete specific backup operation
     if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "rm $BACKUP_DIR/$BACKUP_NAME"; then
@@ -205,6 +257,8 @@ elif [ "$ACTION_TYPE" == "delete" ]; then
     else 
         echo "Failed to delete backup '$BACKUP_DIR/$BACKUP_NAME' inside the container."
     fi
+
+###### Delete all backup files Inside Docker ######
 elif [ "$ACTION_TYPE" == "delete-all" ]; then
     # Perform delete all backups operation
     if docker exec -t $BDS_DOCKER_IMAGE_NAME bash -c "rm -R $BACKUP_DIR"; then
