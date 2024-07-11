@@ -24,6 +24,7 @@ This script automates the process of backing up the database before switching br
 - [x] Uninstall command
 - [x] Add the script to global commands ( to be able to call it in every project without copy/pasting it )
 - [x] Safe restore operation (before each restore operation, it will generate a backup from the current state of the DB with `.safemode` extension)
+- [x] Support local backups ( one usecase is to give it to your colleague for tests/QA/Debugging etc. )
 - [ ] Support for alternative config file name if it's not possible to use `.env`
 - [ ] Support simple postgres database
 - [ ] Install it on `pre-post checkout` hook for current branch
@@ -126,7 +127,9 @@ The script accepts the following commands:
 
 - `-l` or `--list`: List all backups
 - `backup`: Create a backup
+- `backup-local`: Create a backup locally at the working directory
 - `restore`: Restore a backup
+- `restore-local`: Restore from local backup
 - `delete`: Delete a specific backup
 - `delete-all`: Delete all backups
 
@@ -134,9 +137,9 @@ Examples:
 
 1. List all backups: `bds -l`
 
-2. Automatic backup based on current branch name: `bds backup`
+2. Automatic backup based on current branch name: `bds backup` or `bds backup-local`
 
-3. Automatic restore based on current branch name: `bds restore`
+3. Automatic restore based on current branch name: `bds restore` or `bds restore-local`
 
 4. Manual backup with a custom name: `bds backup myBackup`
 
